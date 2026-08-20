@@ -751,6 +751,18 @@ let isTopDownView = false; // Controlla se la vista 2D è attiva
 let selectedSquare2D = null;
 let validMoves2D = [];
 
+// Impostazioni della Partita
+let gameMode = 'pvai'; // 'pvp', 'pvai', 'demo'
+let aiDifficulty = 'medium'; // 'easy', 'medium', 'hard'
+let aiColor = 'b'; // AI color ('w' or 'b')
+
+// Editor della Scacchiera (Setup Mode)
+let isSetupMode = false;
+let selectedSetupPiece = { type: 'p', color: 'w' }; // default: White Pawn
+let isDeleteMode = false;
+let savedSetupFEN = null;
+let savedSetupTurn = 'w';
+
 // Rilevamento Mobile
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
