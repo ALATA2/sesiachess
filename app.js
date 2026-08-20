@@ -487,6 +487,55 @@ const PIXEL_PIECES = {
 
 const pieceImages2D = { w: {}, b: {} }; // Mappa URL Base64 generate all'avvio
 
+/**
+ * Genera proceduralmente le texture 2D in pixel art HD su canvas nascosti
+ */
+function generatePixelArtPieces() {
+    const scale = 4; // Risoluzione pixel art upscalata
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+
+    // Sfumature di colore per dare un aspetto professionale
+    const colors = {
+        w: {
+            x: '#1c1b18', // Outline
+            o: '#ece5d4', // Core Bianco/Crema
+            '+': '#ffffff', // Highlight luce
+            '.': 'transparent'
+        },
+        b: {
+            x: '#121215', // Outline
+            o: '#4d4f54', // Core Nero/Grigio metallico
+            '+': '#7e838c', // Highlight luce
+            '.': 'transparent'
+        }
+    };
+
+    const types = ['p', 'r', 'n', 'b', 'q', 'k'];
+    const colorsKeys = ['w', 'b'];
+
+    colorsKeys.forEach(col => {
+        types.forEach(type => {
+            ctx.clearRect(0, 0, 64, 64);
+            const grid = PIXEL_PIECES[type];
+            const palette = colors[col];
+
+            for (let y = 0; y < 16; y++) {
+                for (let x = 0; x < 16; x++) {
+                    const char = grid[y].charAt(x);
+                    if (char !== '.' && palette[char]) {
+                        ctx.fillStyle = palette[char];
+                        ctx.fillRect(x * scale, y * scale, scale, scale);
+                    }
+                }
+            }
+            pieceImages2D[col][type] = canvas.toDataURL();
+        });
+    });
+}
+
 // ==========================================================================
 // 4. SINTETIZZATORE AUDIO PROCEDURALE (WEB AUDIO API - NO EXTERNAL ASSETS)
 // ==========================================================================
