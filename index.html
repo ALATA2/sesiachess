@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sesia Chess</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Container principale per la scena 3D -->
+    <div id="canvas-container"></div>
+
+    <!-- Container per la Scacchiera 2D Professionale in Pixel Art HD -->
+    <div id="board-2d-container" class="hidden">
+        <div class="board-2d-wrapper glass-panel">
+            <div id="board-2d">
+                <!-- Generato dinamicamente via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- UI Overlay con design Glassmorphism -->
+    <div id="ui-container">
+        <!-- Intestazione del Gioco -->
+        <header class="glass-panel">
+            <h1 data-i18n="title">SESIA CHESS</h1>
+            <div id="turn-indicator" class="white-turn">
+                <span data-i18n="turn">Turn: </span><strong id="current-player" data-i18n="white">WHITE</strong>
+            </div>
+        </header>
+
+        <!-- Pannello delle Impostazioni e Intelligenza Artificiale -->
+        <div id="settings-panel" class="glass-panel">
+            <h3 data-i18n="settings">Settings</h3>
+            
+            <div class="control-group">
+                <label data-i18n="game_mode">Game Mode:</label>
+                <select id="select-mode">
+                    <option value="pvp" data-i18n="pvp">Player vs Player</option>
+                    <option value="pvai" selected data-i18n="pvai">Player vs Computer</option>
+                    <option value="demo" data-i18n="demo">Demo (AI vs AI)</option>
+                </select>
+            </div>
+
+            <div class="control-group" id="difficulty-group">
+                <label data-i18n="difficulty">AI Difficulty:</label>
+                <select id="select-difficulty">
+                    <option value="easy" data-i18n="easy">Easy (Depth 1)</option>
+                    <option value="medium" selected data-i18n="medium">Medium (Depth 2)</option>
+                    <option value="hard" data-i18n="hard">Hard (Depth 3)</option>
+                </select>
+            </div>
+
+            <div class="control-group" id="ai-color-group">
+                <label data-i18n="aiColor">AI Color:</label>
+                <select id="select-ai-color">
+                    <option value="b" selected data-i18n="black">Black</option>
+                    <option value="w" data-i18n="white">White</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label data-i18n="music">Music:</label>
+                <select id="select-music">
+                    <option value="on" data-i18n="on">ON</option>
+                    <option value="off" data-i18n="off">OFF</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label data-i18n="sound">Sound FX:</label>
+                <select id="select-sound">
+                    <option value="on" data-i18n="on">ON</option>
+                    <option value="off" data-i18n="off">OFF</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label data-i18n="lang_label">Language:</label>
+                <select id="select-lang">
+                    <option value="en">English</option>
+                    <option value="it">Italiano</option>
+                    <option value="fr">Français</option>
+                    <option value="es">Español</option>
+                    <option value="ja">日本語</option>
+                    <option value="zh">中文</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Pannello Editor di Scacchiera (Setup Mode) -->
+        <div id="setup-panel" class="glass-panel hidden">
+            <h3 data-i18n="setup_title">Board Editor</h3>
+            <p class="setup-hint" data-i18n="setup_hint">Select a piece and click on the board (3D or 2D) to place or remove it.</p>
+            
+            <div class="setup-palette">
+                <!-- Bianco -->
+                <div class="palette-row">
+                    <span class="palette-label" data-i18n="white">White:</span>
+                    <button class="palette-btn active" data-color="w" data-type="p" data-i18n-title="pawn" title="Pawn">♙</button>
+                    <button class="palette-btn" data-color="w" data-type="r" data-i18n-title="rook" title="Rook">♖</button>
+                    <button class="palette-btn" data-color="w" data-type="n" data-i18n-title="knight" title="Knight">♘</button>
+                    <button class="palette-btn" data-color="w" data-type="b" data-i18n-title="bishop" title="Bishop">♗</button>
+                    <button class="palette-btn" data-color="w" data-type="q" data-i18n-title="queen" title="Queen">♕</button>
+                    <button class="palette-btn" data-color="w" data-type="k" data-i18n-title="king" title="King">♔</button>
+                </div>
+                <!-- Nero -->
+                <div class="palette-row">
+                    <span class="palette-label" data-i18n="black">Black:</span>
+                    <button class="palette-btn" data-color="b" data-type="p" data-i18n-title="pawn" title="Pawn">♟</button>
+                    <button class="palette-btn" data-color="b" data-type="r" data-i18n-title="rook" title="Rook">♜</button>
+                    <button class="palette-btn" data-color="b" data-type="n" data-i18n-title="knight" title="Knight">♞</button>
+                    <button class="palette-btn" data-color="b" data-type="b" data-i18n-title="bishop" title="Bishop">♝</button>
+                    <button class="palette-btn" data-color="b" data-type="q" data-i18n-title="queen" title="Queen">♛</button>
+                    <button class="palette-btn" data-color="b" data-type="k" data-i18n-title="king" title="King">♚</button>
+                </div>
+            </div>
+
+            <div class="setup-actions">
+                <button id="btn-setup-delete" class="btn btn-small" data-i18n-title="setup_delete" title="Delete Piece">
+                    <span class="icon">🗑️</span> <span data-i18n="setup_delete">Delete</span>
+                </button>
+                <button id="btn-setup-clear" class="btn btn-small" data-i18n="setup_clear">Clear</button>
+                <button id="btn-setup-reset" class="btn btn-small" data-i18n="setup_reset">Reset</button>
+            </div>
+
+            <div class="control-group">
+                <label for="select-setup-turn" data-i18n="setup_turn">Turn of:</label>
+                <select id="select-setup-turn">
+                    <option value="w" data-i18n="white">White</option>
+                    <option value="b" data-i18n="black">Black</option>
+                </select>
+            </div>
+
+            <div class="setup-main-actions">
+                <button id="btn-setup-save" class="btn btn-success" data-i18n="setup_save">Save & Play</button>
+                <button id="btn-setup-cancel" class="btn btn-danger" data-i18n="setup_cancel">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Pannello delle info di stato (Scacco, Pensiero AI, ecc.) -->
+        <div id="status-panel" class="glass-panel hidden">
+            <span id="status-text" data-i18n="check">CHECK!</span>
+        </div>
+
+        <!-- Barra di controllo inferiore -->
+        <div id="controls-panel" class="glass-panel">
+            <button id="btn-view" class="btn">
+                <span class="icon">📐</span>
+                <span class="btn-text" data-i18n="view2d">2D View</span>
+            </button>
+            <button id="btn-setup" class="btn">
+                <span class="icon">🔧</span>
+                <span class="btn-text" data-i18n="setup">Edit Board</span>
+            </button>
+            <button id="btn-reset" class="btn">
+                <span class="icon">🔄</span>
+                <span class="btn-text" data-i18n="restart">Restart</span>
+            </button>
+        </div>
+        
+        <!-- Log delle mosse -->
+        <div id="move-history-panel" class="glass-panel">
+            <h3 data-i18n="moves_title">Moves History</h3>
+            <div id="moves-list">
+                <!-- Le mosse verranno inserite qui dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Home Page Screen (Landing Page Overlay) -->
+    <div id="home-screen">
+        <div class="home-content glass-panel">
+            <h1 class="home-title">SESIA CHESS</h1>
+            <p class="home-subtitle" data-i18n="home_subtitle">Battle Chess Redefined</p>
+            
+            <div class="home-settings">
+                <div class="control-group">
+                    <label data-i18n="lang_label">Language:</label>
+                    <select id="home-select-lang">
+                        <option value="en">English</option>
+                        <option value="it">Italiano</option>
+                        <option value="fr">Français</option>
+                        <option value="es">Español</option>
+                        <option value="ja">日本語</option>
+                        <option value="zh">中文</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label data-i18n="initial_view">Initial View:</label>
+                    <select id="home-select-view">
+                        <option value="3d" data-i18n="view3d">3D View</option>
+                        <option value="2d" data-i18n="view2d">2D View</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label data-i18n="game_mode">Game Mode:</label>
+                    <select id="home-select-mode">
+                        <option value="pvp" data-i18n="pvp">Player vs Player</option>
+                        <option value="pvai" selected data-i18n="pvai">Player vs Computer</option>
+                        <option value="demo" data-i18n="demo">Demo (AI vs AI)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label data-i18n="difficulty">AI Difficulty:</label>
+                    <select id="home-select-difficulty">
+                        <option value="easy" data-i18n="easy">Easy (Depth 1)</option>
+                        <option value="medium" selected data-i18n="medium">Medium (Depth 2)</option>
+                        <option value="hard" data-i18n="hard">Hard (Depth 3)</option>
+                    </select>
+                </div>
+
+                <div class="control-group-row">
+                    <div class="control-group">
+                        <label data-i18n="music">Music:</label>
+                        <select id="home-select-music">
+                            <option value="on" data-i18n="on">ON</option>
+                            <option value="off" data-i18n="off">OFF</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label data-i18n="sound">Sound FX:</label>
+                        <select id="home-select-sound">
+                            <option value="on" data-i18n="on">ON</option>
+                            <option value="off" data-i18n="off">OFF</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button id="btn-start-game" class="btn btn-large" data-i18n="play">PLAY GAME</button>
+        </div>
+    </div>
+
+    <!-- Overlay per il Caricamento -->
+    <div id="loading-overlay" class="hidden">
+        <div class="loader-content">
+            <h2 data-i18n="loading_title">Initializing Game...</h2>
+            <div class="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+            <p id="loading-status" data-i18n="loading_status">Generating textures & graphics...</p>
+        </div>
+    </div>
+
+    <!-- Overlay Game Over -->
+    <div id="game-over-overlay" class="hidden">
+        <div class="game-over-content glass-panel">
+            <h2 id="game-over-title" data-i18n="checkmate">CHECKMATE!</h2>
+            <p id="game-over-msg"></p>
+            <button id="btn-restart-game" class="btn btn-large" data-i18n="play_again">Play Again</button>
+        </div>
+    </div>
+
+    <!-- Importazione delle librerie esterne via CDN -->
+    <!-- 1. Three.js Core -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- 2. OrbitControls -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- 3. GLTFLoader -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    
+    <!-- 4. GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- 5. Chess.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+    <!-- Script principale del gioco -->
+    <script src="app.js"></script>
+</body>
+</html>
