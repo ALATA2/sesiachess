@@ -2184,6 +2184,14 @@ function setupUIEvents() {
 
         // Nascondi schermata home
         document.getElementById('home-screen').classList.add('hidden');
+
+        // Mostra overlay di caricamento e avvia la scacchiera 3D
+        document.getElementById('loading-overlay').classList.remove('hidden');
+        loadAllPieces().then(() => {
+            document.getElementById('loading-overlay').classList.add('hidden');
+            animate();
+            triggerAIMove();
+        });
     });
 
     // ==========================================
