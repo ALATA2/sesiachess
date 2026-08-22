@@ -1164,7 +1164,7 @@ function fallbackPieceInstantiation(type, color, square) {
 function setupPieceTransform(mesh, square, color) {
     const coords = algebraicToCoords(square);
     mesh.position.set(coords.x, 0.1, coords.z);
-    mesh.rotation.y = color === 'w' ? Math.PI : 0;
+    mesh.rotation.y = color === 'w' ? 0 : Math.PI;
     mesh.userData = { square: square, isPiece: true };
 }
 
@@ -1370,6 +1370,7 @@ function playPieceAnimation(piece, animationName, loop = true) {
 
 function executeMove3D(fromSq, toSq, moveLogInfo) {
     isAnimating = true;
+    clearHoverHighlight();
     
     const movingPiece = pieceMeshes[fromSq];
     const targetPiece = pieceMeshes[toSq];
@@ -1428,7 +1429,7 @@ function executeMove3D(fromSq, toSq, moveLogInfo) {
             const stepFinal = gsap.timeline({
                 onComplete: () => {
                     gsap.to(movingPiece.mesh.rotation, {
-                        y: movingPiece.color === 'w' ? Math.PI : 0,
+                        y: movingPiece.color === 'w' ? 0 : Math.PI,
                         duration: 0.3,
                         onComplete: () => {
                             playPieceAnimation(movingPiece, ANIMATION_NAMES.idle);
@@ -1547,6 +1548,62 @@ function syncSpecialMoves(fromSq, toSq) {
 // 10. INTERAZIONI UTENTE (3D RAYCASTING & 2D CLIC)
 // ==========================================================================
 
+let hoveredSquare3D = null;
+let originalHoveredColor = null;
+
+function onPointerMove(event) {
+    if (isAnimating || isTopDownView || !selectedSquare) {
+        clearHoverHighlight();
+        return;
+    }
+
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const tiles = [];
+    for (let key in boardSquares3D) {
+        tiles.push(boardSquares3D[key]);
+    }
+
+    const intersects = raycaster.intersectObjects(tiles, true);
+
+    if (intersects.length > 0) {
+        const hitTile = intersects[0].object;
+        const square = hitTile.userData.square;
+
+        if (square !== hoveredSquare3D) {
+            clearHoverHighlight();
+
+            // Se è una mossa valida, evidenziala in rosso acceso (hover)
+            if (validMoves.includes(square)) {
+                hoveredSquare3D = square;
+                const isCapture = chess.get(square) !== null;
+                originalHoveredColor = isCapture ? COLOR_RED_HIGHLIGHT : COLOR_BLUE_HIGHLIGHT;
+                
+                hitTile.material.emissive.setHex(0xff0000);
+                hitTile.material.emissiveIntensity = 0.8;
+            }
+        }
+    } else {
+        clearHoverHighlight();
+    }
+}
+
+function clearHoverHighlight() {
+    if (hoveredSquare3D) {
+        const tile = boardSquares3D[hoveredSquare3D];
+        if (tile) {
+            tile.material.emissive.setHex(originalHoveredColor);
+            tile.material.emissiveIntensity = 0.45;
+        }
+        hoveredSquare3D = null;
+        originalHoveredColor = null;
+    }
+}
+
 function onPointerDown(event) {
     pointerStart.set(event.clientX, event.clientY);
 }
@@ -1655,6 +1712,7 @@ function clearSelection() {
     selectedSquare = null;
     validMoves = [];
     clearHighlights();
+    clearHoverHighlight();
 }
 
 function handle2DClick(square) {
@@ -2057,7 +2115,7 @@ function resetCameraPosition(isTopDown) {
     if (isTopDown) {
         camera.position.set(0, 22, 0.01);
     } else {
-        camera.position.set(0, 15, 16);
+        camera.position.set(0, 15, -16);
     }
     if (controls) {
         controls.target.set(0, 0, 0);
@@ -2073,6 +2131,7 @@ function setupUIEvents() {
     // 3D Canvas
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
     renderer.domElement.addEventListener('pointerup', onPointerUp);
+    renderer.domElement.addEventListener('pointermove', onPointerMove);
 
     // Buttons
     document.getElementById('btn-view').addEventListener('click', toggleCameraView);

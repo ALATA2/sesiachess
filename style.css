@@ -758,3 +758,15 @@ header h1 {
         flex-direction: row;
     }
 }
+
+/* Evidenziazione hover rossa per caselle cliccabili in vista 2D */
+.tile-2d.highlight-blue:hover::after, .tile-2d.highlight-red:hover::after {
+    background: rgba(255, 90, 90, 0.45) !important;
+    box-shadow: 0 0 12px rgba(255, 90, 90, 0.8) !important;
+    border: 3px solid #ff5a5a !important;
+    border-radius: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    top: 0 !important;
+    left: 0 !important;
+}
